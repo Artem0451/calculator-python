@@ -1,0 +1,120 @@
+def toInt(ch):
+    return ord(ch) - 48
+
+
+def isNumber(ch):
+    return 48 <= ord(ch) <= 57
+
+
+def isOperator(ch):
+    return ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '(' or ch == ')'
+
+
+def strToInt(str):
+    current_int, current_int_used, temp = 0, False, 1
+    result = []
+    for i in reversed(range(len(str))):
+        # number
+        if isNumber(str[i]):
+            current_int += toInt(str[i]) * temp
+            current_int_used = True
+            temp *= 10
+            if i == 0:
+                result.append(current_int)
+        # operators
+        elif isOperator(str[i]):
+            if current_int_used:
+                result.append(current_int)
+            result.append(str[i])
+            current_int, current_int_used, temp = 0, False, 1
+        # spaces
+        elif current_int_used:
+            result.append(current_int)
+            current_int, current_int_used, temp = 0, False, 1
+    if len(result) == 0:
+        print('No numbers')
+        exit()
+    result.reverse()
+    return result
+
+
+def calc(str):
+    list_str = strToInt(str)
+    try:
+        while list_str.__contains__('('):
+            temp_list = []
+            counter = 0
+            while list_str[counter] != ')':
+                if list_str[counter] == '(':
+                    temp_list = []
+                    left = counter
+                if list_str[counter] != '(' and list_str[counter] != ')':
+                    temp_list.append(list_str[counter])
+                counter += 1
+            right = counter
+            valueInside = calcInside(temp_list)
+            for i in range(left, right):
+                list_str.pop(left)
+            list_str[left] = valueInside
+        result = calcInside(list_str)
+        return result
+    except:
+        print('Error')
+        exit()
+
+def calcInside(list_str):
+    if len(list_str) == 2:
+        temp = -list_str[1]
+        return temp
+    if list_str[0] == '-':
+        temp = -list_str[1]
+        list_str.pop(1)
+        list_str[0] = temp
+    while list_str.__contains__('*') or list_str.__contains__('/'):
+        for i in range(0, len(list_str)):
+            if list_str[i] == '*':
+                try:
+                    temp = list_str[i - 1] * list_str[i + 1]
+                except NameError:
+                    print('Error')
+                    exit()
+                list_str[i] = temp
+                list_str.pop(i + 1)
+                list_str.pop(i - 1)
+                break
+            elif list_str[i] == '/':
+                try:
+                    temp = list_str[i - 1] / list_str[i + 1]
+                except ZeroDivisionError:
+                    print('Zero division')
+                    exit()
+                list_str[i] = temp
+                list_str.pop(i + 1)
+                list_str.pop(i - 1)
+                break
+    while list_str.__contains__('+') or list_str.__contains__('-'):
+        for i in range(0, len(list_str)):
+            if list_str[i] == '+':
+                try:
+                    temp = list_str[i - 1] + list_str[i + 1]
+                except NameError:
+                    print('Error')
+                    exit()
+                list_str[i] = temp
+                list_str.pop(i + 1)
+                list_str.pop(i - 1)
+                break
+            elif list_str[i] == '-':
+                try:
+                    temp = list_str[i - 1] - list_str[i + 1]
+                except:
+                    print('Error')
+                    exit()
+                list_str[i] = temp
+                list_str.pop(i + 1)
+                list_str.pop(i - 1)
+                break
+    return list_str[0]
+
+
+print(calc(input()))
